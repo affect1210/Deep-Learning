@@ -5,7 +5,7 @@ import tensorflow as tf
 import numpy as np
 import os, sys
 
-current_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+current_path = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
 save_net_path = os.path.join(current_path, "log/save_net.ckpt")
 tf.flags.DEFINE_string("save_net", save_net_path, "save_net.ckpt")
 FLAGS = tf.flags.FLAGS

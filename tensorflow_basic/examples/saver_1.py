@@ -6,7 +6,7 @@ import os, sys
 from tensorflow.contrib.tensorboard.plugins import projector
 
 # sys.argv[0] 表示代码本身文件路径
-current_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+current_path = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
 tf.flags.DEFINE_string("log_dir", os.path.join(current_path, 'log'), "logdir")
 tf.flags.DEFINE_string("save_net", os.path.join(current_path, 'log/save_net.ckpt'), "save_net.ckpt")
 FLAGS = tf.flags.FLAGS

@@ -7,7 +7,7 @@ import os,sys
 from tensorflow.contrib.tensorboard.plugins import projector
 
 # TensorBoard summaries. Default is a log folder in current directory.
-current_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+current_path = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
 tf.flags.DEFINE_string("log_dir",os.path.join(current_path, 'log'),"logdir")
 FLAGS = tf.flags.FLAGS
 
