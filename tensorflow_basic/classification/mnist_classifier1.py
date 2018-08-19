@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*
+'''
+    这个例子是过时的, 最新的是tensorflow.models
+    https://github.com/tensorflow/models/tree/master/official/mnist
+'''
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 # number 1 to 10 data
