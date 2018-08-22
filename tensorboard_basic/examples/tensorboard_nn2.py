@@ -32,7 +32,7 @@ def add_layer(inputs, in_size, out_size,n_layer,activation_function=None):
 x_data = np.linspace(-20, 20, 300)[:, np.newaxis]  # 一个":"代表开始,"::"代表结束
 
 # 加入一些噪点,使不完全按二次方的曲线连续分布
-noise = np.random.normal(0, 0.01, x_data.shape)  # 正态分布
+noise = np.random.normal(0, 0.05, x_data.shape)  # 正态分布
 y_data = np.sin(x_data) - 1 + noise
 
 # 1. define placeholder for inputs to network
@@ -56,7 +56,7 @@ with tf.name_scope('loss'):
     loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))
     tf.summary.scalar('loss',loss)
 with tf.name_scope('train'):
-    train_step = tf.train.AdamOptimizer().minimize(loss)
+    train_step = tf.train.GradientDescentOptimizer(0.3).minimize(loss)
 
 init = tf.global_variables_initializer()
 

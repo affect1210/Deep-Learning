@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*
 import re
 import numpy as np
+import math
 from contextlib import ExitStack
 
 '''
@@ -54,3 +55,30 @@ def load_data_and_labels(positive_data_file, negative_data_file):
         y_lables = np.concatenate((positive_labels, negative_lables), axis=0)
 
     return [x_text, y_lables]
+
+
+def all_batches_generator(all_x_y_train, batch_sentence_size, num_epochs, shuffle=True):
+    '''
+        生成整个迭代需要的所有batch的数据集
+    :param all_x_y_train:
+    :param batch_sentence_size:
+    :param num_epoch:
+    :param shuffle:
+    :return:
+    '''
+    datasets = np.array(all_x_y_train)
+    datasets_size = len(datasets)
+    num_batches_per_epoch = math.ceil(datasets_size / batch_sentence_size)  # 每个epoch中有多少个batch
+    for epoch in range(num_epochs):
+        # 句子随机打乱
+        if shuffle:
+            shuffle_indices = np.random.permutation(np.arange(datasets_size))
+            shuffle_datasets = datasets[shuffle_indices]
+        else:
+            shuffle_datasets = datasets
+
+        # 组装每个batch的句子内容
+        for batch_num in range(num_batches_per_epoch):
+            start_index = batch_num * batch_sentence_size
+            end_index = min((batch_num + 1) * batch_sentence_size, datasets_size)
+            yield shuffle_datasets[start_index:end_index]
