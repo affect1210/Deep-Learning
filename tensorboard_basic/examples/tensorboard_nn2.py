@@ -56,7 +56,7 @@ with tf.name_scope('loss'):
     loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction), reduction_indices=[1]))
     tf.summary.scalar('loss',loss)
 with tf.name_scope('train'):
-    train_step = tf.train.GradientDescentOptimizer(0.3).minimize(loss)
+    train_step = tf.train.AdamOptimizer().minimize(loss)
 
 init = tf.global_variables_initializer()
 
