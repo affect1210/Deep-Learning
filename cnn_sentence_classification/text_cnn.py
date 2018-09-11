@@ -2,6 +2,9 @@
 # -*- coding:utf-8 -*
 import tensorflow as tf
 from cnn_sentence_classification.LoggerUtil import *
+import numpy as np
+
+np.set_printoptions(threshold=np.inf)
 
 
 class TextCNN(object):
@@ -47,13 +50,44 @@ class TextCNN(object):
                 pooled_output = tf.nn.max_pool(
                     feature_map,
                     ksize=[1, max_sentence_length - region + 1, 1, 1],
-                    strides=[1,1,1,1],
+                    strides=[1, 1, 1, 1],
                     padding='VALID',
                     name="max_pool")
                 # 日志
-                info_logger.info(pooled_output)
+                info_logger.info(tf.convert_to_tensor(pooled_output))
                 pooled_outputs.append(pooled_output)
-        # self.tensor_pooled_outputs = tf.convert_to_tensor(pooled_outputs)
         # 合并所有池化后的特征
-        # num_filters_total = num_filters * len(region)
-        # self.feature_pooled =
+        num_filters_total = num_filters * len(region_size)
+        self.feature_pooled = tf.concat(pooled_outputs, 3)
+        self.feature_pooled_flat = tf.reshape(self.feature_pooled, [-1, num_filters_total])
+
+        info_logger.info(self.feature_pooled_flat)
+
+        # 添加DropOut
+        with tf.name_scope("dropout"):
+            self.feature_pooled_dropout = tf.nn.dropout(self.feature_pooled_flat, self.dropout_keep_prob)
+
+        # 评分和预测
+        with tf.name_scope("output"):
+            # “Xavier”初始化方法是一种很有效的神经网络初始化方法，方法来源于2010年的一篇论文
+            # 《Understanding the difficulty of training deep feedforward neural networks》，
+            # 可惜直到近两年，这个方法才逐渐得到更多人的应用和认可。
+            W = tf.get_variable(
+                "classifer_w",
+                shape=[num_filters_total, num_classes],
+                initializer=tf.contrib.layers.xavier_initializer())
+            b = tf.Variable(tf.constant(0.1, shape=[num_classes], name="classifer_b"))
+            # 这个函数的作用是利用L2范数来计算张量的误差值，但是没有开方并且只L2范数的值的一半
+            l2_loss += tf.nn.l2_loss(W)
+            l2_loss += tf.nn.l2_loss(b)
+            # 相当于matmul(x, weights) + biases.
+            self.scores = tf.nn.xw_plus_b(self.feature_pooled_dropout, W, b, name="scores")
+            # 返回的是vector中的最大值的索引号，如果vector是一个向量，那就返回一个值，如果是一个矩阵，那就返回一个向量，这个向量的每一个维度都是相对应矩阵行的最大值元素的索引号。
+            self.predictions = tf.argmax(self.scores, 1, name="predictions")
+        # Calculate mean cross-entropy loss
+        with tf.name_scope("loss"):
+            # 1. 第一步是先对网络最后一层的输出做一个softmax
+            # 2. 第二步是softmax的输出向量[Y1，Y2,Y3…]和样本的实际标签做一个交叉熵
+            losses = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
+            # 如果不指定第二个参数，那么就在所有的元素中取平均值
+            self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss

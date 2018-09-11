@@ -28,6 +28,6 @@ class TestBase(TestCase):
     def logging_error(self, content):
         error_logger.error(content)
 
-    def test(self):
-        self.logging_info("info")
-        self.logging_error("error")
+    # def test(self):
+    #     self.logging_info("info")
+    #     self.logging_error("error")
