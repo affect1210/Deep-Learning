@@ -3,9 +3,14 @@
 from cnn_sentence_classification.cnn_params_flags import FLAGS
 from cnn_sentence_classification import data_parser
 from cnn_sentence_classification.text_cnn import TextCNN
+from cnn_sentence_classification.app_root import get_root_path
 from tensorflow.contrib import learn
 import tensorflow as tf
 import numpy as np
+import time, os, datetime
+from cnn_sentence_classification.LoggerUtil import *
+
+project_root_path = get_root_path()
 
 
 # 数据预处理
@@ -56,6 +61,64 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
                           vocabulary_size=len(vocab_processor.vocabulary_), embedding_size=FLAGS.embedding_dims,
                           region_size=list(map(int, FLAGS.filter_size.split(","))),
                           num_filters=FLAGS.num_filter_per_region, l2_reg_lambda=FLAGS.l2_reg_lambda)
+        """
+             参数选择性训练方法:
+                1、定义Variable时设置trainable=False
+                2、通知optimizer只更新部分梯度：opt.compute_gradients(loss, var_list)
+        """
         # Define Training procedure
-        # 变量在计算过程中是可变的，并且在训练过程中会自动更新或优化。如果只想在 tf 外手动更新变量，那需要声明变量是不可训练的，比如 not_trainable = tf.Variable(0, trainable=False)
+        # 变量在计算过程中是可变的，并且在训练过程中会自动更新或优化。如果只想在 tf 外手动更新变量，
+        # 那需要声明变量是不可训练的，比如 not_trainable = tf.Variable(0, trainable=False)
+        # 计数器
         global_step = tf.Variable(0, name="global_step", trainable=False)
+        # 本质上是带有动量项的RMSprop，它利用梯度的一阶矩估计和二阶矩估计动态调整每个参数的学习率。
+        # Adam的优点主要在于经过偏置校正后，每一次迭代学习率都有个确定范围，使得参数比较平稳.
+        optimizer = tf.train.AdamOptimizer()
+        # compute_gradients 返回的是：A list of (gradient, variable) pairs
+        grads_and_vars = optimizer.compute_gradients(cnn.loss)
+        # minimize() = compute_gradients() + apply_gradients()
+        # 拆分成计算梯度和应用梯度两个步骤
+        train_op = optimizer.apply_gradients(grads_and_vars=grads_and_vars, global_step=global_step)
+
+        # Output directory for models and summaries
+        timestamp = str(int(time.time()))
+        out_dir = os.path.abspath(os.path.join(project_root_path, "runs", timestamp))
+        info_logger.info("Writing to {}\n".format(out_dir))
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        # Checkpoint directory
+        checkpoint_dir = os.path.abspath(os.path.join(out_dir, "checkpoints"))
+        checkpoint_prefix = os.path.join(checkpoint_dir, "model")
+        if not os.path.exists(checkpoint_dir):
+            os.makedirs(checkpoint_dir)
+        saver = tf.train.Saver(tf.global_variables(), max_to_keep=FLAGS.num_checkpoints)
+
+        # 保存vocabulary
+        vocab_processor.save(os.path.join(out_dir, "vocab"))
+        # Initialize all variables
+        session.run(tf.global_variables_initializer())
+
+        def train_step(x_batch, y_batch):
+            feed_dict = {
+                cnn.input_x: x_batch,
+                cnn.input_y: y_batch,
+                cnn.dropout_keep_prob: FLAGS.dropout_keep_prob
+            }
+            _, step, loss, accuracy = session.run([train_op, global_step, cnn.loss, cnn.accuracy], feed_dict)
+            time_str = datetime.datetime.now().isoformat()
+            # 在保证六位有效数字的前提下，使用小数方式，否则使用科学计数法
+            info_logger.info("{}: step {},loss {:g} , accuracy {:g}".format(time_str, step, loss, accuracy))
+
+        # batch 训练
+        batches = data_parser.all_batches_generator(list(zip(x_train, y_train)),
+                                                    batch_sentence_size=FLAGS.batch_sentence_size,
+                                                    num_epochs=FLAGS.num_epochs)
+        # Training loop. For each batch...
+        for batch in batches:
+            x_batch, y_batch = zip(*batch)
+            train_step(x_batch, y_batch)
+            current_step = tf.train.global_step(session, global_step)
+            if current_step % FLAGS.checkpoint_every == 0:
+                path = saver.save(session, checkpoint_prefix, global_step=current_step)
+                info_logger.info("Save model checkpoint to {}".format(path))

@@ -27,7 +27,6 @@ class TestTextCNN(TestBase):
 
     def test_train(self):
         x_train, y_train, vocab_processor, x_dev, y_dev = preprocess()
-        # gen_all_batches = all_batches_generator(list(zip(x_train, y_train)), 64, 1)
         train(x_train, y_train, vocab_processor, x_dev, y_dev)
 
 

@@ -91,3 +91,7 @@ class TextCNN(object):
             losses = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
             # 如果不指定第二个参数，那么就在所有的元素中取平均值
             self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss
+
+        with tf.name_scope("accuracy"):
+            correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))
+            self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
