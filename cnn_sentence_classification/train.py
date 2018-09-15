@@ -87,6 +87,15 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
         if not os.path.exists(out_dir):
             os.makedirs(out_dir)
 
+        # Summaries for loss and accuracy
+        loss_summary = tf.summary.scalar("loss", cnn.loss)
+        acc_summary = tf.summary.scalar("accuracy", cnn.accuracy)
+
+        # Train Summaries
+        train_summary_op = tf.summary.merge([loss_summary, acc_summary])
+        train_summary_dir = os.path.join(out_dir, "summaries", "train")
+        train_summary_writer = tf.summary.FileWriter(train_summary_dir, session.graph)
+
         # Checkpoint directory
         checkpoint_dir = os.path.abspath(os.path.join(out_dir, "checkpoints"))
         checkpoint_prefix = os.path.join(checkpoint_dir, "model")

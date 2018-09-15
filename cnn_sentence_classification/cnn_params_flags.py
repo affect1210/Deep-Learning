@@ -18,6 +18,12 @@ tf.flags.DEFINE_string("positive_data_file", project_root_path + "/data/en_polar
                        "positive data file path")
 tf.flags.DEFINE_string("negative_data_file", project_root_path + "/data/en_polaritydata/rt-polarity.neg",
                        "negative data file path")
+# 评估预测数据集
+tf.flags.DEFINE_string("eval_pos_all", project_root_path + "/data/evaluation_data/pos_all.txt",
+                       "positive data file path")
+tf.flags.DEFINE_string("eval_neg_all", project_root_path + "/data/evaluation_data/neg_all.txt",
+                       "negative data file path")
+
 # 模型超参数
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dims", 128, "Dimensionality of character embedding (default: 128)")
@@ -44,7 +50,7 @@ tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 # ./eval.py --eval_train --checkpoint_dir="./runs/1459637919/checkpoints/"
 tf.flags.DEFINE_string("checkpoint_dir", project_root_path + "/runs/1536822449/checkpoints",
                        "Checkpoint directory from training run")
-tf.flags.DEFINE_boolean("eval_train", False, "Evaluate on all training data")
+tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 
 
 def test_params():

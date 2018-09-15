@@ -23,16 +23,19 @@ class TextCNN(object):
 
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
+            # 词典矩阵
             self.EW = tf.Variable(tf.random_uniform([vocabulary_size, embedding_size],
                                                     -1.0, 1.0, dtype=tf.float32), name="EW")
+            # 用词典矩阵词向量替换 batch中所有的输入源矩阵
             self.embedded_chars = tf.nn.embedding_lookup(self.EW, self.input_x)
+            # 为了给卷积用的加一维
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
         # 为每个不同region大小的卷积核创建 convolution + maxpool 层
         pooled_outputs = []
         for i, region in enumerate(region_size):
             with tf.name_scope("conv-maxpool-{}".format(region)):
                 # Convolution Layer
-                # 卷积核矩阵的形状
+                # 卷积核矩阵的形状 [卷积核高度，卷积核宽度，图像通道数，卷积核个数]
                 filter_shape = [region, embedding_size, 1, num_filters]
                 CW = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="CW")
                 cb = tf.Variable(tf.constant(0.1, shape=[num_filters]), name="cb")
