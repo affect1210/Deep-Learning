@@ -47,7 +47,7 @@ def evaluation():
             predictions = graph.get_operation_by_name("output/predictions").outputs[0]
 
             # Generate batches  for one epoch
-            batches = data_parser.all_batches_generator(list(x_test), batch_sentence_size=FLAGS.batch_sentence_size,
+            batches = data_parser.all_batches_generator(list(x_test), num_sentence_per_batch=FLAGS.num_sentence_per_batch,
                                                         num_epochs=1, shuffle=False)
             # Collect the predictions here
             all_predictions = []

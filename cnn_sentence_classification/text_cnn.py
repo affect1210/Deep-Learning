@@ -16,6 +16,7 @@ class TextCNN(object):
     def __init__(self, max_sentence_length, num_classes,
                  vocabulary_size, embedding_size, region_size, num_filters, l2_reg_lambda=0.0):
         # 将某些特殊的操作指定为 "feed" 操作, 标记的方法是使用 tf.placeholder() 为这些操作创建占位符
+        # shape[num_sentence_per_batch,56]
         self.input_x = tf.placeholder(tf.int32, [None, max_sentence_length], name="input_x")
         self.input_y = tf.placeholder(tf.float32, [None, num_classes], name="input_y")
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
@@ -27,6 +28,7 @@ class TextCNN(object):
             self.EW = tf.Variable(tf.random_uniform([vocabulary_size, embedding_size],
                                                     -1.0, 1.0, dtype=tf.float32), name="EW")
             # 用词典矩阵词向量替换 batch中所有的输入源矩阵
+            # 在参数EW中查找word_id所对应的表示，shape[?,56,128]
             self.embedded_chars = tf.nn.embedding_lookup(self.EW, self.input_x)
             # 为了给卷积用的加一维
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)

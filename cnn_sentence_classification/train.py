@@ -121,7 +121,7 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
 
         # batch 训练
         batches = data_parser.all_batches_generator(list(zip(x_train, y_train)),
-                                                    batch_sentence_size=FLAGS.batch_sentence_size,
+                                                    num_sentence_per_batch=FLAGS.num_sentence_per_batch,
                                                     num_epochs=FLAGS.num_epochs)
         # Training loop. For each batch...
         for batch in batches:

@@ -57,18 +57,18 @@ def load_data_and_labels(positive_data_file, negative_data_file):
     return [x_text, y_lables]
 
 
-def all_batches_generator(all_x_y_train, batch_sentence_size, num_epochs, shuffle=True):
+def all_batches_generator(all_x_y_train, num_sentence_per_batch, num_epochs, shuffle=True):
     '''
         生成整个迭代需要的所有batch的数据集
     :param all_x_y_train:
-    :param batch_sentence_size:
+    :param num_sentence_per_batch:
     :param num_epoch:
     :param shuffle:
     :return:
     '''
     datasets = np.array(all_x_y_train)
     datasets_size = len(datasets)
-    num_batches_per_epoch = math.ceil(datasets_size / batch_sentence_size)  # 每个epoch中有多少个batch
+    num_batches_per_epoch = math.ceil(datasets_size / num_sentence_per_batch)  # 每个epoch中有多少个batch
     for epoch in range(num_epochs):
         # 句子随机打乱
         if shuffle:
@@ -79,6 +79,6 @@ def all_batches_generator(all_x_y_train, batch_sentence_size, num_epochs, shuffl
 
         # 组装每个batch的句子内容
         for batch_num in range(num_batches_per_epoch):
-            start_index = batch_num * batch_sentence_size
-            end_index = min((batch_num + 1) * batch_sentence_size, datasets_size)
+            start_index = batch_num * num_sentence_per_batch
+            end_index = min((batch_num + 1) * num_sentence_per_batch, datasets_size)
             yield shuffle_datasets[start_index:end_index]
