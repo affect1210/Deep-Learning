@@ -20,7 +20,12 @@ def preprocess():
 
     # Build vocabulary
     max_sentence_length = max([len(x.split(" ")) for x in x_text])
+    # tflearn.data_utils.VocabularyProcessor (max_document_length, min_frequency=0, vocabulary=None, tokenizer_fn=None)
+    # max_document_length: 文档的最大长度。如果文本的长度大于最大长度，那么它会被剪切，反之则用0填充.
+    # min_frequency: 词频的最小值，出现次数小于最小词频则不会被收录到词表中
+    # vocabulary: CategoricalVocabulary object.
     vocab_processor = learn.preprocessing.VocabularyProcessor(max_sentence_length)
+    # 文本转为词ID序列，未知或填充用的词ID为0
     x_text = np.array(list(vocab_processor.fit_transform(x_text)))
 
     # Randomly shuffle data

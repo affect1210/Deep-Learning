@@ -18,6 +18,7 @@ class TextCNN(object):
         # 将某些特殊的操作指定为 "feed" 操作, 标记的方法是使用 tf.placeholder() 为这些操作创建占位符
         # shape[num_sentence_per_batch,56]
         self.input_x = tf.placeholder(tf.int32, [None, max_sentence_length], name="input_x")
+        # shape[num_sentence_per_batch,2]
         self.input_y = tf.placeholder(tf.float32, [None, num_classes], name="input_y")
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
         l2_loss = tf.constant(0.0)
@@ -25,10 +26,11 @@ class TextCNN(object):
         # Embedding layer
         with tf.device('/cpu:0'), tf.name_scope("embedding"):
             # 词典矩阵
+            # shape[词典中词数,128]
             self.EW = tf.Variable(tf.random_uniform([vocabulary_size, embedding_size],
                                                     -1.0, 1.0, dtype=tf.float32), name="EW")
             # 用词典矩阵词向量替换 batch中所有的输入源矩阵
-            # 在参数EW中查找word_id所对应的表示，shape[?,56,128]
+            # 在参数EW中查找word_id所对应的表示，embedded_chars_shape[?,56,128]
             self.embedded_chars = tf.nn.embedding_lookup(self.EW, self.input_x)
             # 为了给卷积用的加一维
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
@@ -42,6 +44,8 @@ class TextCNN(object):
                 CW = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="CW")
                 cb = tf.Variable(tf.constant(0.1, shape=[num_filters]), name="cb")
                 # convolution funcation
+                # tf.nn.conv2d(input, filter, strides, padding, use_cudnn_on_gpu=None, data_format=None, name=None)
+                # input = [batch, in_height, in_width, in_channels]
                 conv_value = tf.nn.conv2d(
                     self.embedded_chars_expanded,
                     CW, strides=[1, 1, 1, 1],

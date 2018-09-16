@@ -36,6 +36,7 @@ def load_data_and_labels(positive_data_file, negative_data_file):
     :param negative_data_file:
     :return:
     """
+    # ExitStack()上下文管理器被设计为使得可以容易地以编程方式组合其他上下文管理器和清除功能，特别是那些是可选的或以其他方式由输入数据驱动的
     with ExitStack() as exitstack:
         # 加载数据文件
         # 1、readlines:返回文件所有行,区别于readline
@@ -70,7 +71,7 @@ def all_batches_generator(all_x_y_train, num_sentence_per_batch, num_epochs, shu
     datasets_size = len(datasets)
     num_batches_per_epoch = math.ceil(datasets_size / num_sentence_per_batch)  # 每个epoch中有多少个batch
     for epoch in range(num_epochs):
-        # 句子随机打乱
+        # 句子随机打乱 好像没必要了
         if shuffle:
             shuffle_indices = np.random.permutation(np.arange(datasets_size))
             shuffle_datasets = datasets[shuffle_indices]
