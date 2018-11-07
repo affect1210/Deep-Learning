@@ -90,7 +90,7 @@ def create_model(data_format):
 
 def define_mnist_flags():
     data_dir = project_root_path + '\mnist_data'
-    model_dir = project_root_path + '\model_model'
+    model_dir = project_root_path + '\mnist_model'
 
     flags_core.define_base()
     flags_core.define_performance(num_parallel_calls=False)
