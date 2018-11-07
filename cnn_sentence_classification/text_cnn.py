@@ -46,6 +46,7 @@ class TextCNN(object):
                 # convolution funcation
                 # tf.nn.conv2d(input, filter, strides, padding, use_cudnn_on_gpu=None, data_format=None, name=None)
                 # input = [batch, in_height, in_width, in_channels]
+                # Returns: A `Tensor`.Has the same type as `input`.
                 conv_value = tf.nn.conv2d(
                     self.embedded_chars_expanded,
                     CW, strides=[1, 1, 1, 1],
@@ -98,7 +99,7 @@ class TextCNN(object):
             # 1. 第一步是先对网络最后一层的输出做一个softmax
             # 2. 第二步是softmax的输出向量[Y1，Y2,Y3…]和样本的实际标签做一个交叉熵
             losses = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
-            # 如果不指定第二个参数，那么就在所有的元素中取平均值
+            # 如果不指定第二个参数，那么就在所有的元素中取平均值 l2_reg_lambda: 正则化率
             self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss
 
         with tf.name_scope("accuracy"):

@@ -71,7 +71,7 @@ def all_batches_generator(all_x_y_train, num_sentence_per_batch, num_epochs, shu
     datasets_size = len(datasets)
     num_batches_per_epoch = math.ceil(datasets_size / num_sentence_per_batch)  # 每个epoch中有多少个batch
     for epoch in range(num_epochs):
-        # 句子随机打乱 好像没必要了
+        # 保证每个epoch中的句子顺序也都是不同的
         if shuffle:
             shuffle_indices = np.random.permutation(np.arange(datasets_size))
             shuffle_datasets = datasets[shuffle_indices]

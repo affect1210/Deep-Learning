@@ -14,7 +14,7 @@ def evaluation():
     # CHANGE THIS: Load data. Load your own data here
     if FLAGS.eval_train:
         x_raw, y_test = data_parser.load_data_and_labels(FLAGS.eval_pos_all, FLAGS.eval_neg_all)
-        y_test = np.argmax(y_test, axis=1)
+        y_test = np.argmax(y_test, axis= 1)
     else:
         x_raw = ["a masterpiece four years in the making", "I feel good."]
         y_test = [1, 0]
