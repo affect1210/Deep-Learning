@@ -31,7 +31,6 @@ from neural_network.app_root import get_root_path
 LEARNING_RATE = 1e-4
 project_root_path = get_root_path()
 
-
 def create_model(data_format):
     """Model to recognize digits in the MNIST dataset.
 
@@ -166,6 +165,7 @@ def run_mnist(flags_obj):
     session_config = tf.ConfigProto(
         inter_op_parallelism_threads=flags_obj.inter_op_parallelism_threads,
         intra_op_parallelism_threads=flags_obj.intra_op_parallelism_threads,
+        # allow_soft_placement=True,log_device_placement=True)
         allow_soft_placement=True)
 
     distribution_strategy = distribution_utils.get_distribution_strategy(
