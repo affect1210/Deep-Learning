@@ -13,11 +13,13 @@
 """
 
 from keras.datasets import mnist
-from keras.utils import np_utils
+from keras.utils import np_utils,plot_model
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 #  Momentum(惯性原则) + AdaGrad(对错误反向的阻力) = RMSProp
 from keras.optimizers import RMSprop
+from keras_dl.app_root import get_root_path
+app_root_path = get_root_path()
 import numpy as np
 
 np.set_printoptions(threshold=np.inf)
@@ -41,6 +43,11 @@ print('y_test shape:', y_test.shape)
 # Another way to build your neural net
 model = Sequential([Dense(32, input_dim=784), Activation('relu'), Dense(10), Activation('softmax')])
 
+
+# save show model
+model_file = app_root_path + '\classifier.png'
+plot_model(model, show_shapes=True, to_file=model_file)
+
 # Another way to define your optimizer
 '''
 lr: float >= 0. 学习率.
@@ -58,11 +65,10 @@ model.compile(
 )
 
 # define training
-model.fit(X_train,y_train,nb_epoch=2,batch_size=32)
+model.fit(X_train, y_train, nb_epoch=2, batch_size=32)
 
 # define testing
 loss,accuracy = model.evaluate(X_test,y_test)
 
 print('test loss:',loss)
 print('test accuracy:',accuracy)
-
