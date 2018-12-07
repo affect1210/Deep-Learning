@@ -13,7 +13,7 @@ from tensorflow.contrib import learn
 def evaluation():
     # CHANGE THIS: Load data. Load your own data here
     if FLAGS.eval_train:
-        x_raw, y_test = data_parser.load_data_and_labels(FLAGS.eval_pos_all, FLAGS.eval_neg_all)
+        x_raw, y_test = data_parser.load_data_and_labels(FLAGS.positive_test_data_file, FLAGS.negative_test_data_file)
         y_test = np.argmax(y_test, axis= 1)
     else:
         x_raw = ["a masterpiece four years in the making", "I feel good."]
@@ -66,7 +66,7 @@ def evaluation():
     predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions))
     out_path = os.path.join(FLAGS.checkpoint_dir, "..", "predictions.csv")
     info_logger.info("Saving evaluation to {}".format(out_path))
-    with open(out_path, 'w') as f:
+    with open(out_path, 'w',encoding='utf-8') as f:
         csv.writer(f).writerows(predictions_human_readable)
 
 if __name__ == "__main__":

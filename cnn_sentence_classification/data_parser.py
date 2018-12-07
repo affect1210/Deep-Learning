@@ -48,7 +48,8 @@ def load_data_and_labels(positive_data_file, negative_data_file):
         negative_examples = [s.strip() for s in negative_examples]
         # 分词
         x_text = positive_examples + negative_examples
-        x_text = [clean_str(sentence) for sentence in x_text]
+        # x_text = [clean_str(sentence) for sentence in x_text]
+        x_text = [sentence for sentence in x_text]
         # 生成标签
         positive_labels = [[0, 1] for _ in positive_examples]
         negative_lables = [[1, 0] for _ in negative_examples]
@@ -83,3 +84,5 @@ def all_batches_generator(all_x_y_train, num_sentence_per_batch, num_epochs, shu
             start_index = batch_num * num_sentence_per_batch
             end_index = min((batch_num + 1) * num_sentence_per_batch, datasets_size)
             yield shuffle_datasets[start_index:end_index]
+
+

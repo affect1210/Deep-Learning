@@ -13,11 +13,22 @@ import os
 project_root_path = get_root_path()
 
 FLAGS = tf.app.flags.FLAGS
-tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-tf.flags.DEFINE_string("positive_data_file", project_root_path + "/data/en_polaritydata/rt-polarity.pos",
+tf.flags.DEFINE_float("dev_sample_percentage", .2, "Percentage of the training data to use for validation")
+# tf.flags.DEFINE_string("positive_data_file", project_root_path + "/data/en_polaritydata/rt-polarity.pos",
+#                        "positive data file path")
+# tf.flags.DEFINE_string("negative_data_file", project_root_path + "/data/en_polaritydata/rt-polarity.neg",
+#                        "negative data file path")
+
+tf.flags.DEFINE_string("positive_data_file", project_root_path + "/data/taptap_data/taptap_train.pos",
                        "positive data file path")
-tf.flags.DEFINE_string("negative_data_file", project_root_path + "/data/en_polaritydata/rt-polarity.neg",
+tf.flags.DEFINE_string("negative_data_file", project_root_path + "/data/taptap_data/taptap_train.neg",
                        "negative data file path")
+
+tf.flags.DEFINE_string("positive_test_data_file", project_root_path + "/data/eval_taptap_data/taptap_test.pos",
+                       "positive test data file path")
+tf.flags.DEFINE_string("negative_test_data_file", project_root_path + "/data/eval_taptap_data/taptap_test.neg",
+                       "negative test data file path")
+
 # 评估预测数据集
 tf.flags.DEFINE_string("eval_pos_all", project_root_path + "/data/evaluation_data/pos_all.txt",
                        "positive data file path")
@@ -28,7 +39,7 @@ tf.flags.DEFINE_string("eval_neg_all", project_root_path + "/data/evaluation_dat
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dims", 128, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
-tf.flags.DEFINE_string("filter_size", "3,4,5", "Comma-separated filter sizes (default:'3、4、5')")
+tf.flags.DEFINE_string("filter_size", "3,5,7,9,11", "Comma-separated filter sizes (default:'3、4、5')")
 tf.flags.DEFINE_integer("num_filter_per_region", 128, "Number of filters per region size (default: 128)")
 tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 0.0)")
 
@@ -48,7 +59,7 @@ tf.flags.DEFINE_boolean("log_device_placement", True, "Log placement of ops on d
 # 评估参数 Evaluation Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 # ./eval.py --eval_train --checkpoint_dir="./runs/1459637919/checkpoints/"
-tf.flags.DEFINE_string("checkpoint_dir", project_root_path + "/runs/1536822449/checkpoints",
+tf.flags.DEFINE_string("checkpoint_dir", project_root_path + "/runs/1544091182/checkpoints",
                        "Checkpoint directory from training run")
 tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 

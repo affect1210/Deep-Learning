@@ -10,6 +10,5 @@ from cnn_sentence_classification.cnn_params_flags import FLAGS
 class TestLoad_data_and_labels(TestCase):
 
     def test_load_data_and_labels(self):
-        x_y_examples = load_data_and_labels(FLAGS.positive_data_file,FLAGS.negative_data_file)
-        print(x_y_examples[0][0])
-        print(x_y_examples[1][0])
+        x_text, y_lables = load_data_and_labels(FLAGS.positive_data_file,FLAGS.negative_data_file)
+        print(x_text[:])
