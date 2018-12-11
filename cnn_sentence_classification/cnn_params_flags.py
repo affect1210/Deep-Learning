@@ -63,6 +63,13 @@ tf.flags.DEFINE_string("checkpoint_dir", project_root_path + "/runs/1544091182/c
                        "Checkpoint directory from training run")
 tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 
+# word2id
+word2id_output_file = project_root_path + "/data/taptap_data/word_to_id.txt"
+corpus_root_dir = project_root_path + "/data/taptap_data/"
+tf.flags.DEFINE_string("word2id_output_file",word2id_output_file,"word2id output file")
+tf.flags.DEFINE_string("corpus_root_dir",corpus_root_dir,"corpus root dir")
+
+
 
 def test_params():
     positive_data_file = FLAGS.positive_data_file
