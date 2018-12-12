@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*
-from cnn_sentence_classification.test_cases.test_base import TestBase
+from cnn_sentence_classification.test_cases import *
 import unittest
 import tensorflow as tf
 import numpy as np
@@ -13,7 +13,7 @@ import numpy as np
             但是却又保留了其值的原始的相对排列顺序，因此即为 “soft”
     cross_entropy:
 """
-class TestSoftMax_CrossEntropy(TestBase):
+class TestSoftMax_CrossEntropy(TestCase):
     input_x = np.array([[0., 2., 1.], [0., 0., 1.]])
     label = np.array([[0., 0., 1.], [0., 0., 1.]])
 
