@@ -19,4 +19,7 @@ info_logger = logging.getLogger('infoLogger')
 error_logger = logging.getLogger('errorLogger')
 test_logger = logging.getLogger('testLogger')
 
+INFO = logging.INFO
+DEBUG = logging.DEBUG
+ERROR = logging.ERROR
 

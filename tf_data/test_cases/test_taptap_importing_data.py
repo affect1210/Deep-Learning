@@ -23,7 +23,7 @@ class TestTaptap_importing_data(TestCase):
     def test_dataset_iterator_test(self):
         pass
 
-    @pytest.mark.skip(reason="ignore")
+    # @pytest.mark.skip(reason="ignore")
     def  test_dataset_list_files(self):
         dataset_list_files()
         test_logger.info("test_dataset_list_files is ok")
@@ -32,3 +32,8 @@ class TestTaptap_importing_data(TestCase):
         project_root = get_root_path()
         vocab_file_path = project_root + "/runs/taptap_review_vocab"
         build_vocabulary(dataset_list_files(),vocab_file_path)
+
+    def test_load_vocabulary(self):
+        project_root = get_root_path()
+        vocab_file_path = project_root + "/runs/taptap_review_vocab"
+        load_vocabulary(vocab_file_path)
