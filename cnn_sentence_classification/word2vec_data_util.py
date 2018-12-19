@@ -15,7 +15,6 @@ import numpy as np
 import os
 from cnn_sentence_classification.app_root import get_root_path
 
-
 """
     0.1     构建字典
         ------------------
@@ -49,7 +48,7 @@ def build_word2id(output_file, corpus_root_dir):
         return output_file
     return "build word2id file fail."
 """
-    0.1.1 加载词典
+    0.2 加载词典
 """
 def load_word2id(word2id_path):
     word2id = {}
@@ -61,4 +60,10 @@ def load_word2id(word2id_path):
             if word not in word2id:
                 word2id[word] = wid
     return word2id
+
+"""
+    
+"""
+
+
 
