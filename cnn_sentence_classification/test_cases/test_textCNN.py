@@ -2,13 +2,13 @@
 import unittest
 from cnn_sentence_classification.text_cnn import TextCNN
 from cnn_sentence_classification.train import *
-from cnn_sentence_classification.test_cases.test_base import TestBase
 from cnn_sentence_classification.data_parser import *
+from cnn_sentence_classification.test_cases import *
 import tensorflow as tf
 import os,sys
 
 # -*- coding:utf-8 -*
-class TestTextCNN(TestBase):
+class TestTextCNN(TestCase):
 
     @unittest.skip('skip embedding_layer')
     def test_embedding_layer(self):
