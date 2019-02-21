@@ -1,0 +1,3 @@
+import gensim
+from cnn_sentence_classification.cnn_params_flags import FLAGS
+from word_to_vector import get_root_path
