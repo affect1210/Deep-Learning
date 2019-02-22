@@ -3,16 +3,7 @@ from cnn_sentence_classification.cnn_params_flags import FLAGS
 import gensim
 from gensim.models import Word2Vec
 from gensim.models.word2vec import LineSentence
-from tensorflow.contrib import learn
-
-import tensorflow as tf
-import tensorlayer as tl
-import collections
-import random
-import pickle
-from tensorflow.python.platform import gfile
-from contextlib import ExitStack
-import numpy as np
+from word_to_vector.tl_word_embeddings_model import *
 
 """
 Gensim 方法
@@ -46,16 +37,16 @@ class GensimProcessor(object):
         self.vocabulary = None
 
     def fit(self, path):
-        self.model = Word2Vec(LineSentence(path),  #
-                              sg=1,  #
-                              size=200,  #
-                              window=8,  #
-                              min_count=5,  #
+        self.model = Word2Vec(LineSentence(path),  # 训练数据
+                              sg=1,  # 1表示使用skip-gram模式，其他表示CBOW模式
+                              size=200,  # 词向量维度大小
+                              window=8,  # 窗口大小
+                              min_count=5,  # 忽略出现次数小于值的词
                               negative=3,  #
                               sample=0.0001,  #
-                              hs=0,  #
-                              workers=5,  #
-                              iter=5,  #
+                              hs=0,  # 1表示层次softmax优化，0表示负采样优化
+                              workers=5,  # 工作线程数
+                              iter=5,  # 迭代次数
                               compute_loss=True  #
                               )
 
@@ -82,7 +73,8 @@ tensorflow 方式
 
 
 # ######################################### #
-# TODO 使用tensorflow进行词向量训练，未完成 #
+# 使用tensorflow进行词向量训练
+# TODO 疑似存在问题，待探究
 # ######################################### #
 class Vocabulary(CategoricalVocabulary):
 
@@ -99,22 +91,41 @@ class Vocabulary(CategoricalVocabulary):
         self._freeze = True
 
 
+class TFVocabulary(learn.preprocessing.CategoricalVocabulary):
+    """
+    use tensorlayar.nlp.build_words_dataset to create vocabulary
+    """
+
+    def __init__(self, model, unknown_token="<UNK>"):
+        learn.preprocessing.CategoricalVocabulary.__init__(self, unknown_token, True)
+
+        self._freq = model.count
+        self._mapping = model.dictionary
+        self._reverse_mapping = list(model.dictionary.keys())
+        self._freeze = True
+
+
 class TensorProcessor(object):
     def __init__(self):
         self.vocabulary = None
+        self.model = TFWordEmbeddings()
 
     def fit(self, path):
-        pass
+        f = open(path, mode="r", encoding="UTF-8")
+        data = f.readlines()
+        self.model.train(data)
+        self.vocabulary = TFVocabulary(self.model)
 
     def save(self, path, binary=False):
-        pass
+        self.model.save(path)
 
     def load(self, path=FLAGS.gensim_model_file):
-        pass
+        self.model = TFWordEmbeddings.load(path)
+        self.vocabulary = TFVocabulary(self.model)
 
     @property
     def word_embeddings(self):
-        return None
+        return self.model.word_embeddings
 
     def vocab_processor(self, max_document_length):
         return learn.preprocessing.VocabularyProcessor(max_document_length, vocabulary=self.vocabulary)

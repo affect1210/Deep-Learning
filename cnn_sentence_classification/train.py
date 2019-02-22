@@ -10,6 +10,7 @@ import numpy as np
 import time, os, datetime
 from cnn_sentence_classification.LoggerUtil import *
 from word_to_vector.word_embeddings import GensimProcessor
+from word_to_vector.word_embeddings import TensorProcessor
 
 project_root_path = get_root_path()
 
@@ -63,6 +64,54 @@ def preprocess_with_gensim():
 
     # new GensimProcessor
     gensim_processor = GensimProcessor()
+    # load gensim word embeddings
+    gensim_processor.load()
+    # word embeddings matrix
+    word_embeddings = gensim_processor.word_embeddings
+    # generate VocabularyProcessor
+    vocab_processor = gensim_processor.vocab_processor(max_sentence_length)
+
+    print("transform data to word embeddings...")
+    # transform train set
+    x_text = np.array(list(vocab_processor.transform(x_text)))
+
+    print("generate test and valid data set...")
+    # Randomly shuffle data
+    np.random.seed(10)
+    shuffle_indices = np.random.permutation(np.arange(len(y_labels)))
+    x_shuffle = x_text[shuffle_indices]
+    y_shuffle = y_labels[shuffle_indices]
+
+    # 分割训练集与测试集
+    # TODO: This is very crude, should use cross-validation
+    dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y_labels)))
+    x_train, x_dev = x_shuffle[:dev_sample_index], x_shuffle[dev_sample_index:]
+    y_train, y_dev = y_shuffle[:dev_sample_index], y_shuffle[dev_sample_index:]
+
+    del x_text, y_labels, x_shuffle, y_shuffle
+
+    print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+    print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
+
+    print("==============================================finish to preprocess data=============================================")
+
+    # 训练集  建立中文词汇表和把文本转为词ID序列   测试集
+    return x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings
+
+
+# 使用gensim生成的词向量进行训练
+def preprocess_with_tensorflow():
+    print("==============================================start to preprocess data==============================================")
+
+    print("load data and labels...")
+    x_text, y_labels = data_parser.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
+
+    max_sentence_length = max([len(x.split(" ")) for x in x_text])
+
+    print("load word embeddings...")
+
+    # new GensimProcessor
+    gensim_processor = TensorProcessor()
     # load gensim word embeddings
     gensim_processor.load()
     # word embeddings matrix
@@ -215,6 +264,14 @@ def train_with_word_embeddings():
     使用gensim训练的词向量进行模型训练
     """
     x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings = preprocess_with_gensim()
+    train(x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings)
+
+
+def train_with_tensor_embeddings():
+    """
+    使用tensorlayer训练的词向量进行模型训练
+    """
+    x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings = preprocess_with_tensorflow()
     train(x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings)
 
 
