@@ -36,8 +36,8 @@ class TextCNN(object):
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
         l2_loss = tf.constant(0.0)
 
-        # Embedding layer
-        with tf.device('/cpu:0'), tf.name_scope("embedding"):
+        # Embedding layer , use '/cpu:0' to run in cpu
+        with tf.device('/gpu:0'), tf.name_scope("embedding"):
 
             if word_embeddings is not None:
                 # TODO 用词向量字典替换随机字典EW
