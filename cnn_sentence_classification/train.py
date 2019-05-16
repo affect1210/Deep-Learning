@@ -9,6 +9,8 @@ import tensorflow as tf
 import numpy as np
 import time, os, datetime
 from cnn_sentence_classification.LoggerUtil import *
+from word_to_vector.word_embeddings import GensimProcessor
+from word_to_vector.word_embeddings import TensorProcessor
 
 project_root_path = get_root_path()
 
@@ -16,7 +18,7 @@ project_root_path = get_root_path()
 # 数据预处理
 def preprocess():
     print("Loading data ...")
-    x_text, y_lables = data_parser.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
+    x_text, y_labels = data_parser.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
 
     # Build vocabulary
     max_sentence_length = max([len(x.split(" ")) for x in x_text])
@@ -30,23 +32,119 @@ def preprocess():
 
     # Randomly shuffle data
     np.random.seed(10)
-    shuffle_indices = np.random.permutation(np.arange(len(y_lables)))
+    shuffle_indices = np.random.permutation(np.arange(len(y_labels)))
     x_shuffle = x_text[shuffle_indices]
-    y_shuffle = y_lables[shuffle_indices]
+    y_shuffle = y_labels[shuffle_indices]
 
     # 分割训练集与测试集
     # TODO: This is very crude, should use cross-validation
-    dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y_lables)))
+    dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y_labels)))
     x_train, x_dev = x_shuffle[:dev_sample_index], x_shuffle[dev_sample_index:]
     y_train, y_dev = y_shuffle[:dev_sample_index], y_shuffle[dev_sample_index:]
 
-    del x_text, y_lables, x_shuffle, y_shuffle
+    del x_text, y_labels, x_shuffle, y_shuffle
 
     print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
     print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
     # 训练集  建立中文词汇表和把文本转为词ID序列   测试集
-    return x_train, y_train, vocab_processor, x_dev, y_dev
+    return x_train, y_train, x_dev, y_dev, vocab_processor
+
+
+# 使用gensim生成的词向量进行训练
+def preprocess_with_gensim():
+    print("==============================================start to preprocess data==============================================")
+
+    print("load data and labels...")
+    x_text, y_labels = data_parser.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
+
+    max_sentence_length = max([len(x.split(" ")) for x in x_text])
+
+    print("load word embeddings...")
+
+    # new GensimProcessor
+    gensim_processor = GensimProcessor()
+    # load gensim word embeddings
+    gensim_processor.load()
+    # word embeddings matrix
+    word_embeddings = gensim_processor.word_embeddings
+    # generate VocabularyProcessor
+    vocab_processor = gensim_processor.vocab_processor(max_sentence_length)
+
+    print("transform data to word embeddings...")
+    # transform train set
+    x_text = np.array(list(vocab_processor.transform(x_text)))
+
+    print("generate test and valid data set...")
+    # Randomly shuffle data
+    np.random.seed(10)
+    shuffle_indices = np.random.permutation(np.arange(len(y_labels)))
+    x_shuffle = x_text[shuffle_indices]
+    y_shuffle = y_labels[shuffle_indices]
+
+    # 分割训练集与测试集
+    # TODO: This is very crude, should use cross-validation
+    dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y_labels)))
+    x_train, x_dev = x_shuffle[:dev_sample_index], x_shuffle[dev_sample_index:]
+    y_train, y_dev = y_shuffle[:dev_sample_index], y_shuffle[dev_sample_index:]
+
+    del x_text, y_labels, x_shuffle, y_shuffle
+
+    print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+    print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
+
+    print("==============================================finish to preprocess data=============================================")
+
+    # 训练集  建立中文词汇表和把文本转为词ID序列   测试集
+    return x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings
+
+
+# 使用gensim生成的词向量进行训练
+def preprocess_with_tensorflow():
+    print("==============================================start to preprocess data==============================================")
+
+    print("load data and labels...")
+    x_text, y_labels = data_parser.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
+
+    max_sentence_length = max([len(x.split(" ")) for x in x_text])
+
+    print("load word embeddings...")
+
+    # new GensimProcessor
+    gensim_processor = TensorProcessor()
+    # load gensim word embeddings
+    gensim_processor.load()
+    # word embeddings matrix
+    word_embeddings = gensim_processor.word_embeddings
+    # generate VocabularyProcessor
+    vocab_processor = gensim_processor.vocab_processor(max_sentence_length)
+
+    print("transform data to word embeddings...")
+    # transform train set
+    x_text = np.array(list(vocab_processor.transform(x_text)))
+
+    print("generate test and valid data set...")
+    # Randomly shuffle data
+    np.random.seed(10)
+    shuffle_indices = np.random.permutation(np.arange(len(y_labels)))
+    x_shuffle = x_text[shuffle_indices]
+    y_shuffle = y_labels[shuffle_indices]
+
+    # 分割训练集与测试集
+    # TODO: This is very crude, should use cross-validation
+    dev_sample_index = -1 * int(FLAGS.dev_sample_percentage * float(len(y_labels)))
+    x_train, x_dev = x_shuffle[:dev_sample_index], x_shuffle[dev_sample_index:]
+    y_train, y_dev = y_shuffle[:dev_sample_index], y_shuffle[dev_sample_index:]
+
+    del x_text, y_labels, x_shuffle, y_shuffle
+
+    print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+    print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
+
+    print("==============================================finish to preprocess data=============================================")
+
+    # 训练集  建立中文词汇表和把文本转为词ID序列   测试集
+    return x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings
 
 
 '''
@@ -54,18 +152,24 @@ def preprocess():
 '''
 
 
-def train(x_train, y_train, vocab_processor, x_dev, y_dev):
+def train(x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings=None):
     with tf.Graph().as_default():
         # log_device_placement=True
         # allow_soft_placement=True
         session_conf = tf.ConfigProto(log_device_placement=FLAGS.log_device_placement,
                                       allow_soft_placement=FLAGS.allow_soft_placement)
+
         session = tf.Session(config=session_conf)
+
         with session.as_default():
-            cnn = TextCNN(max_sentence_length=x_train.shape[1], num_classes=y_train.shape[1],
-                          vocabulary_size=len(vocab_processor.vocabulary_), embedding_size=FLAGS.embedding_dims,
+            cnn = TextCNN(max_sentence_length=x_train.shape[1],
+                          num_classes=y_train.shape[1],
+                          vocabulary_size=len(vocab_processor.vocabulary_),
+                          embedding_size=FLAGS.embedding_dims,
+                          word_embeddings=word_embeddings,
                           region_size=list(map(int, FLAGS.filter_size.split(","))),
-                          num_filters=FLAGS.num_filter_per_region, l2_reg_lambda=FLAGS.l2_reg_lambda)
+                          num_filters=FLAGS.num_filter_per_region,
+                          l2_reg_lambda=FLAGS.l2_reg_lambda)
             """
                  参数选择性训练方法:
                     1、定义Variable时设置trainable=False
@@ -108,8 +212,9 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
                 os.makedirs(checkpoint_dir)
             saver = tf.train.Saver(tf.global_variables(), max_to_keep=FLAGS.num_checkpoints)
 
-            # 保存vocabulary
+            # save vocabulary
             vocab_processor.save(os.path.join(out_dir, "vocab"))
+
             # Initialize all variables
             session.run(tf.global_variables_initializer())
 
@@ -119,8 +224,14 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
                     cnn.input_y: y_batch,
                     cnn.dropout_keep_prob: FLAGS.dropout_keep_prob
                 }
-                _, step, summaries, loss, accuracy = session.run(
-                    [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy], feed_dict)
+                _, step, summaries, loss, accuracy, flat, embedded = session.run(
+                    [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy,
+                     cnn.feature_pooled_flat, cnn.embedded_chars_expanded],
+                    feed_dict)
+
+                # print("flat shape:{}".format(flat.shape))
+                # print("embedded shape:{}".format(embedded.shape))
+
                 time_str = datetime.datetime.now().isoformat()
                 # 在保证六位有效数字的前提下，使用小数方式，否则使用科学计数法
                 info_logger.info("{}: step {},loss {:g} , accuracy {:g}".format(time_str, step, loss, accuracy))
@@ -131,10 +242,38 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev):
                                                         num_sentence_per_batch=FLAGS.num_sentence_per_batch,
                                                         num_epochs=FLAGS.num_epochs)
             # Training loop. For each batch...
-            for batch in batches:
+            for i, batch in enumerate(batches):
                 x_batch, y_batch = zip(*batch)
                 train_step(x_batch, y_batch)
                 current_step = tf.train.global_step(session, global_step)
                 if current_step % FLAGS.checkpoint_every == 0:
                     path = saver.save(session, checkpoint_prefix, global_step=current_step)
                     info_logger.info("Save model checkpoint to {}".format(path))
+
+
+def train_with_random_embeddings():
+    """
+    使用随机词向量进行模型训练
+    """
+    x_train, y_train, x_dev, y_dev, vocab_processor = preprocess()
+    train(x_train, y_train, x_dev, y_dev, vocab_processor)
+
+
+def train_with_word_embeddings():
+    """
+    使用gensim训练的词向量进行模型训练
+    """
+    x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings = preprocess_with_gensim()
+    train(x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings)
+
+
+def train_with_tensor_embeddings():
+    """
+    使用tensorlayer训练的词向量进行模型训练
+    """
+    x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings = preprocess_with_tensorflow()
+    train(x_train, y_train, x_dev, y_dev, vocab_processor, word_embeddings)
+
+
+if __name__ == "__main__":
+    train_with_word_embeddings()

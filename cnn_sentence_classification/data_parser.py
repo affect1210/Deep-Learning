@@ -84,5 +84,3 @@ def all_batches_generator(all_x_y_train, num_sentence_per_batch, num_epochs, shu
             start_index = batch_num * num_sentence_per_batch
             end_index = min((batch_num + 1) * num_sentence_per_batch, datasets_size)
             yield shuffle_datasets[start_index:end_index]
-
-

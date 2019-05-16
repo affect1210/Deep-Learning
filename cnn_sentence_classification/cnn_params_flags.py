@@ -11,6 +11,8 @@ import os
     如果不传参数,采用默认设置
 '''
 project_root_path = get_root_path()
+# 项目根目录
+root_path = project_root_path + "/.."
 
 FLAGS = tf.app.flags.FLAGS
 tf.flags.DEFINE_float("dev_sample_percentage", .2, "Percentage of the training data to use for validation")
@@ -37,11 +39,11 @@ tf.flags.DEFINE_string("eval_neg_all", project_root_path + "/data/evaluation_dat
 
 # 模型超参数
 # Model Hyperparameters
-tf.flags.DEFINE_integer("embedding_dims", 128, "Dimensionality of character embedding (default: 128)")
-tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
+tf.flags.DEFINE_integer("embedding_dims", 200, "Dimensionality of character embedding (default: 128)")
+tf.flags.DEFINE_float("dropout_keep_prob", 0.8, "Dropout keep probability (default: 0.5)")
 tf.flags.DEFINE_string("filter_size", "3,5,7,9,11", "Comma-separated filter sizes (default:'3、4、5')")
 tf.flags.DEFINE_integer("num_filter_per_region", 128, "Number of filters per region size (default: 128)")
-tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 0.0)")
+tf.flags.DEFINE_float("l2_reg_lambda", 0.3, "L2 regularization lambda (default: 0.0)")
 
 # 训练参数
 # Training parameters
@@ -59,16 +61,19 @@ tf.flags.DEFINE_boolean("log_device_placement", True, "Log placement of ops on d
 # 评估参数 Evaluation Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 # ./eval.py --eval_train --checkpoint_dir="./runs/1459637919/checkpoints/"
-tf.flags.DEFINE_string("checkpoint_dir", project_root_path + "/runs/1544091182/checkpoints",
+tf.flags.DEFINE_string("checkpoint_dir", project_root_path + "/runs/1550728732/checkpoints",
                        "Checkpoint directory from training run")
 tf.flags.DEFINE_boolean("eval_train", True, "Evaluate on all training data")
 
 # word2id
 word2id_output_file = project_root_path + "/data/taptap_data/word_to_id.txt"
 corpus_root_dir = project_root_path + "/data/taptap_data/"
-tf.flags.DEFINE_string("word2id_output_file",word2id_output_file,"word2id output file")
-tf.flags.DEFINE_string("corpus_root_dir",corpus_root_dir,"corpus root dir")
+tf.flags.DEFINE_string("word2id_output_file", word2id_output_file, "word2id output file")
+tf.flags.DEFINE_string("corpus_root_dir", corpus_root_dir, "corpus root dir")
 
+# word embeddings
+w2v_folder_path = root_path + "/word_to_vector"
+tf.flags.DEFINE_string("gensim_model_file", w2v_folder_path + "/data/part_fucun2vec.model", "gensim model file")
 
 
 def test_params():

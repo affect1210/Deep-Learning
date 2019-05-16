@@ -18,5 +18,3 @@ else:
 info_logger = logging.getLogger('infoLogger')
 error_logger = logging.getLogger('errorLogger')
 test_logger = logging.getLogger('testLogger')
-
-
